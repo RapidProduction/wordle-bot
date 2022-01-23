@@ -1,4 +1,4 @@
-# wordle-bot
+# A simple Wordle Bot
 Try out WORDLE guessing algorithm
 
 ### To run it:
@@ -29,3 +29,7 @@ Try out WORDLE guessing algorithm
 # BRAVO! it's CRIMP
 # Number of tries: 4
 ```
+
+### Improvement:
+- Find possibility and compare between possible word sets.
+- Improve performance.
