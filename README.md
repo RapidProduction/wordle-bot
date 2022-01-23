@@ -2,7 +2,10 @@
 Try out WORDLE guessing algorithm
 
 ### To run it:
-`node index.js`
+```
+# yarn
+# node index.js
+```
 
 ### To use it:
 - You tell the bot the clue
