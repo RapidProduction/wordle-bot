@@ -1,4 +1,4 @@
-# A simple Wordle Bot
+# A Simple Wordle Bot
 Try out WORDLE guessing algorithm
 
 ### To run it:
