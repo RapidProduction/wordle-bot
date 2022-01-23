@@ -34,5 +34,6 @@ Try out WORDLE guessing algorithm
 ```
 
 ### Improvement:
-- Find possibility and compare between possible word sets.
-- Improve performance.
+- Find possibility and compare between possible word sets
+- Improve performance
+- All word test
