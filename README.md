@@ -1,6 +1,8 @@
 # A Simple Wordle Bot
 Try out WORDLE guessing algorithm
 
+# Result: 78% success rate
+
 ### To run it:
 ```
 # yarn
