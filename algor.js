@@ -1,10 +1,4 @@
-const engWords = require('an-array-of-english-words');
-
-const WORD_LENGTH = 5;
-const VOWELS = ['a', 'e', 'i', 'o', 'u'];
-const WORDLE_WORDS = engWords.filter((w) => w.length === WORD_LENGTH);
-
-const { countCharFrequency, distinctWords, isCorrect, translateClue } = require('./utils');
+const { WORDLE_WORDS, VOWELS, countCharFrequency, distinctWords, isCorrect, translateClue } = require('./utils');
 
 // find propability
 const getMostDistinctVowelsWords = (words, vowels) => {
@@ -50,11 +44,11 @@ const getMostDistinctFrequentCharWords = (words) => {
 
   const maxRatedWord = Object.entries(ratedWord).filter((wordEntry) => wordEntry[1] >= maxRate);
 
-  return maxRatedWord[0][0];
+  return maxRatedWord.length > 0 ? maxRatedWord.map((w) => w[0]) : [];
 };
 
 // filtering
-const filterWordByContainAllChar = (words, containedCharNotOnIndex) => {
+const filterWordByContainChar = (words, containedCharNotOnIndex) => {
   const filteredWords = [];
 
   words.forEach((word) => {
@@ -90,7 +84,7 @@ const filterWordByNotContainChar = (words, containedChar) => {
   return filteredWords;
 };
 
-const filterWordByFixedChar = (words, charAtIndexes) => {
+const filterWordByContainFixedChar = (words, charAtIndexes) => {
   const filteredWords = [];
 
   words.forEach((word) => {
@@ -108,11 +102,11 @@ const filterWordByFixedChar = (words, charAtIndexes) => {
   return filteredWords;
 };
 
-const filterWords = (words, containAtIndexChar, containedCharNotOnIndex, notContainedChar) => {
+const filterCorrectWords = (words, containAtIndexChar, containedCharNotOnIndex, notContainedChar) => {
   let filteredWords = words;
 
   if (Object.keys(containAtIndexChar).length > 0) {
-    filteredWords = filterWordByFixedChar(filteredWords, containAtIndexChar);
+    filteredWords = filterWordByContainFixedChar(filteredWords, containAtIndexChar);
   }
 
   if (notContainedChar.length > 0) {
@@ -120,15 +114,36 @@ const filterWords = (words, containAtIndexChar, containedCharNotOnIndex, notCont
   }
 
   if (Object.keys(containedCharNotOnIndex).length > 0) {
-    filteredWords = filterWordByContainAllChar(filteredWords, containedCharNotOnIndex);
+    filteredWords = filterWordByContainChar(filteredWords, containedCharNotOnIndex);
   }
+
+  return filteredWords;
+};
+
+const filterExploredWords = (words, containAtIndexChar, containedCharNotOnIndex, notContainedChar) => {
+  let triedOutChar = [];
+
+  if (Object.keys(containAtIndexChar).length > 0) {
+    triedOutChar = triedOutChar.concat(Object.keys(containAtIndexChar));
+  }
+
+  if (Object.keys(containedCharNotOnIndex).length > 0) {
+    triedOutChar = triedOutChar.concat(Object.keys(containedCharNotOnIndex));
+  }
+
+  if (notContainedChar.length > 0) {
+    triedOutChar = triedOutChar.concat(notContainedChar);
+  }
+
+  let filteredWords = filterWordByNotContainChar(words, triedOutChar);
+  filteredWords = distinctWords(filteredWords);
 
   return filteredWords;
 };
 
 const determine = (state, clue) => {
   const round = state.round;
-  let possibleWords = state.possibleWords.slice();
+  let possibleCorrectWords = state.possibleWords.slice();
   let containAtIndexChar = { ...state.containAtIndexChar };
   let containedCharNotOnIndex = { ...state.containedCharNotOnIndex };
   let notContainedChar = state.notContainedChar.slice();
@@ -142,11 +157,33 @@ const determine = (state, clue) => {
     containAtIndexChar = { ...containAtIndexChar, ...a };
     containedCharNotOnIndex = { ...containedCharNotOnIndex, ...b };
     notContainedChar = notContainedChar.concat(c);
-    possibleWords = filterWords(possibleWords, containAtIndexChar, containedCharNotOnIndex, notContainedChar);
-    if (round === 2) {
-      tryWord = getMostDistinctFrequentCharWords(possibleWords);
+
+    possibleCorrectWords = filterCorrectWords(
+      possibleCorrectWords,
+      containAtIndexChar,
+      containedCharNotOnIndex,
+      notContainedChar,
+    );
+
+    let possibleExploredWords = filterExploredWords(
+      WORDLE_WORDS,
+      containAtIndexChar,
+      containedCharNotOnIndex,
+      notContainedChar,
+    );
+
+    if (possibleCorrectWords.length > 4 && possibleExploredWords.length > 1) {
+      // explore words if possible
+      tryWord = possibleExploredWords[0];
     } else {
-      tryWord = possibleWords[0];
+      // try possible corrects words
+      const distinctWords = getMostDistinctFrequentCharWords(possibleCorrectWords);
+
+      if (round < 5 && distinctWords && distinctWords.length > 0) {
+        tryWord = distinctWords[0];
+      } else {
+        tryWord = possibleCorrectWords[0];
+      }
     }
   }
 
@@ -154,7 +191,7 @@ const determine = (state, clue) => {
     tryWord,
     state: {
       round: round + 1,
-      possibleWords,
+      possibleWords: possibleCorrectWords,
       containAtIndexChar,
       containedCharNotOnIndex,
       notContainedChar,

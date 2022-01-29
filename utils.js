@@ -1,4 +1,8 @@
+const engWords = require('an-array-of-english-words');
+
 const WORD_LENGTH = 5;
+const VOWELS = ['a', 'e', 'i', 'o', 'u'];
+const WORDLE_WORDS = engWords.filter((w) => w.length === WORD_LENGTH);
 
 const countWordChar = (words) => {
   const charCount = new Object();
@@ -74,12 +78,29 @@ const countCharFrequency = (words) => {
 
 const isCorrect = (clue) => clue.split(',').filter((c) => c.length === 3 && c[0] === '[').length === WORD_LENGTH;
 
+const shuffle = (array) => {
+  let currentIndex = array.length,
+    randomIndex;
+
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+};
+
 module.exports = {
+  WORDLE_WORDS,
+  VOWELS,
   countCharFrequency,
   countWordChar,
   distinctWords,
   isCorrect,
   isDistinct,
   readInput,
+  shuffle,
   translateClue,
 };
