@@ -4,9 +4,12 @@ Try out WORDLE guessing algorithm
 # Result: 78% success rate
 
 ### To run it:
-```
+``` 
 # yarn
 # node index.js
+
+// running test
+# node test.js
 ```
 
 ### To use it:
